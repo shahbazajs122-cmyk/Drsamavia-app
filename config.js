@@ -1,4 +1,4 @@
-export const firebaseConfig = {
+export const firebaseConfig = { ... };
   apiKey: "AIzaSyDbMBekLrUAiOa4HJOOEJcnrIJnmOGD81I",
   authDomain: "dr-samavia-clinic.firebaseapp.com",
   projectId: "dr-samavia-clinic",
