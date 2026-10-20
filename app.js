@@ -3,7 +3,16 @@ import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase
 import {getAuth,onAuthStateChanged,RecaptchaVerifier,signInWithPhoneNumber,signInWithEmailAndPassword,signOut,updateProfile} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {getFirestore,collection,doc,addDoc,setDoc,getDoc,updateDoc,onSnapshot,query,where,orderBy,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import {getStorage,ref,uploadBytes,getDownloadURL} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
-const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;':'&quot;',"'":'&#39;'}[c]));let auth,db,storage,user,admin=false,confirmation,unsubs=[],bookings=[],chatUnsub=null;const fee=k=>k==='online'?2000:1000;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+}[c]));
+let auth, db, storage, user, admin = false, confirmation, unsubs = [], bookings = [], chatUnsub = null;
+const fee = k => k === 'online' ? 2000 : 1000;
 function msg(t,error=false){$('message').innerHTML='<div class="notice '+(error?'':'success')+'">'+esc(t)+'</div>';scrollTo(0,0)}function clear(){unsubs.forEach(f=>f());unsubs=[];if(chatUnsub)chatUnsub();chatUnsub=null}function view(id){for(const x of ['home','book','appointments','history','payments','chat','hospital','profile'])$(x).classList.toggle('hide',x!==id);scrollTo(0,0)}function portal(r){$('clientLogin').classList.toggle('hide',r!=='client');$('adminLogin').classList.toggle('hide',r!=='admin');$('otpForm').classList.add('hide')}
 if(firebaseConfig.apiKey==='REPLACE_ME'){$('setup').classList.remove('hide');$('login').querySelectorAll('button,input').forEach(el=>el.disabled=true)}else{const app=initializeApp(firebaseConfig);auth=getAuth(app);db=getFirestore(app);storage=getStorage(app);onAuthStateChanged(auth,async u=>{clear();user=u;admin=false;$('login').classList.toggle('hide',!!u);$('clientApp').classList.add('hide');$('adminApp').classList.add('hide');if(!u)return;try{const token=await u.getIdTokenResult();admin=token.claims.admin===true;if(admin){$('adminApp').classList.remove('hide');listenAdmin()}else{if(!u.phoneNumber)throw Error('Client accounts require verified phone authentication.');$('clientApp').classList.remove('hide');$('welcome').textContent=u.displayName||'Client';$('profileText').textContent=(u.displayName||'Client')+' · '+u.phoneNumber;view('home');listenClient()}}catch(e){msg(e.message,true);await signOut(auth)}})}
 document.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.role)portal(b.dataset.role);if(b.dataset.view)view(b.dataset.view);if(b.dataset.action==='logout')await signOut(auth);if(b.dataset.action==='schedule'){const date=prompt('Appointment date (YYYY-MM-DD)');if(!/^\d{4}-\d{2}-\d{2}$/.test(date||''))return;const time=prompt('Appointment time (HH:MM, Pakistan time)');if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(time||''))return;await change(b.dataset.id,{status:'awaiting_payment',date,time})}if(b.dataset.action==='reject')await change(b.dataset.id,{status:'rejected'});if(b.dataset.action==='verify'){if(confirm('Have you independently checked the funds in the receiving account?'))await change(b.dataset.id,{status:'confirmed',paymentStatus:'verified'})}if(b.dataset.action==='payment')await submitPayment(b.dataset.id)});
