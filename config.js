@@ -1,9 +1,6 @@
-export const firebaseConfig = { ... };
-  apiKey: "AIzaSyDbMBekLrUAiOa4HJOOEJcnrIJnmOGD81I",
-  authDomain: "dr-samavia-clinic.firebaseapp.com",
-  projectId: "dr-samavia-clinic",
-  storageBucket: "dr-samavia-clinic.firebasestorage.app",
-  messagingSenderId: "104424927726",
-  appId: "1:104424927726:web:50e832380e25bf66ae1eff",
-  measurementId: "G-27GW6S1CGC"
+// Replace these placeholders with your Firebase project's public WEB configuration.
+// Do not put service-account private keys in this file.
+export const firebaseConfig = {
+  apiKey: 'REPLACE_ME', authDomain: 'REPLACE_ME', projectId: 'REPLACE_ME',
+  storageBucket: 'REPLACE_ME', messagingSenderId: 'REPLACE_ME', appId: 'REPLACE_ME'
 };
